@@ -1,33 +1,33 @@
-# Feature Specifications
+# Каталог спецификаций
 
-Catalog of feature specs gathered by **Lisa** (SpecAgent) through structured PDR interviews.
+Спеки фич, собранные через **Lisa** (SpecAgent) по результатам структурированных PDR-интервью.
 
-## How It Works
+## Как это работает
 
-1. **Lisa** conducts an interview in Telegram — gathers requirements, user stories, acceptance criteria
-2. Spec files committed here, organized by project
-3. **Dev agent** picks up specs, implements, updates progress
+1. **Lisa** проводит интервью в Telegram — собирает требования, user stories, критерии приёмки
+2. Файлы спецификации коммитятся сюда, по папкам проектов
+3. **Dev-агент** берёт спеку, реализует, обновляет прогресс
 
-## Projects
+## Проекты
 
-| Project | Path | Description |
-|---------|------|-------------|
-| MaxAiDeveloper | [`maxaideveloper/`](maxaideveloper/) | Telegram knowledge bot |
-| meeting-recorder | [`meeting-recorder/`](meeting-recorder/) | iPad meeting recorder app |
-| PostRepost | [`postrepost/`](postrepost/) | Telegram media reposter |
-| Researcher | [`researcher/`](researcher/) | Personal Telegram research agent (NotebookLM + Supabase) |
-| SpecAgent | [`specagent/`](specagent/) | Lisa interview bot itself |
+| Проект | Папка | Описание |
+|--------|-------|----------|
+| MaxAiDeveloper | [`maxaideveloper/`](maxaideveloper/) | Telegram-бот для управления знаниями, задачами и встречами |
+| meeting-recorder | [`meeting-recorder/`](meeting-recorder/) | iPad-приложение для записи встреч с транскрипцией |
+| PostRepost | [`postrepost/`](postrepost/) | Telegram-бот для репоста медиа из соцсетей |
+| Researcher | [`researcher/`](researcher/) | Персональный Telegram-агент для исследований (NotebookLM + Supabase) |
+| SpecAgent | [`specagent/`](specagent/) | Lisa — бот для сбора спецификаций через интервью |
 
-## Spec Format
+## Формат спеки
 
-Each feature produces 3 files:
+Каждая фича — 3 файла:
 
-- `{feature-slug}.md` — full specification (user stories, acceptance criteria, technical design, phases)
-- `{feature-slug}.json` — structured data for programmatic access
-- `{feature-slug}-progress.txt` — phase checklist with `[x]`/`[ ]` markers
+- `{feature-slug}.md` — полная спецификация (user stories, критерии приёмки, техдизайн, фазы)
+- `{feature-slug}.json` — структурированные данные для программного доступа
+- `{feature-slug}-progress.txt` — чеклист по фазам `[x]`/`[ ]`
 
-## Statuses
+## Статусы
 
-- **new** — spec created, not started
-- **in-progress** — dev agent working on it
-- **done** — all phases complete
+- **new** — спека создана, работа не начата
+- **in-progress** — dev-агент работает
+- **done** — все фазы завершены
