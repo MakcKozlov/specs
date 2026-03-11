@@ -1,0 +1,381 @@
+{
+  "project": {
+    "name": "Researcher",
+    "slug": "researcher-agent",
+    "description": "Personal Telegram bot that accepts free-form research requests with files/links, processes them through Google NotebookLM via notebooklm-py, and returns generated research outputs. Runs as an OpenClaw agent on Mac mini.",
+    "type": "personal_telegram_research_bot",
+    "mvp_goal": "Turn Telegram into a personal interface for running research workflows through Google NotebookLM."
+  },
+  "tech_stack": {
+    "language": "Python",
+    "telegram": "python-telegram-bot or aiogram",
+    "notebooklm_integration": "https://github.com/teng-lin/notebooklm-py",
+    "database": "Supabase (PostgreSQL)",
+    "runtime": "OpenClaw on Mac mini",
+    "telegram_mode_mvp": "polling",
+    "telegram_mode_prod": "webhook"
+  },
+  "dependencies": [
+    {
+      "name": "notebooklm-py",
+      "url": "https://github.com/teng-lin/notebooklm-py",
+      "role": "Primary adapter for Google NotebookLM integration"
+    },
+    {
+      "name": "Supabase",
+      "role": "Metadata storage, project registry, search index"
+    },
+    {
+      "name": "OpenClaw",
+      "role": "Agent runtime and Telegram routing layer"
+    },
+    {
+      "name": "Telegram Bot API",
+      "role": "User interface (only interface in MVP)"
+    }
+  ],
+  "architecture": {
+    "flow": "Telegram -> OpenClaw -> Researcher Agent -> notebooklm-py / NotebookLM -> Supabase -> Telegram",
+    "deployment_phase_1": "Local on Mac mini with polling",
+    "deployment_phase_2": "VPS with webhook",
+    "model": "Separate repository, later plugs into OpenClaw as standalone agent"
+  },
+  "user_stories": [
+    {
+      "id": "US-1",
+      "title": "Create a new research task",
+      "description": "User sends a text request and materials in Telegram, bot creates a research project.",
+      "acceptance_criteria": [
+        "User can send a free-form text request",
+        "User can attach one or more materials",
+        "Bot creates a new research project",
+        "Messages within 2-minute window are grouped into one project",
+        "Bot sends confirmation of task acceptance"
+      ]
+    },
+    {
+      "id": "US-2",
+      "title": "Support mixed input types",
+      "description": "User sends various material types through a single Telegram interface.",
+      "acceptance_criteria": [
+        "Bot accepts plain links",
+        "Bot accepts YouTube URLs",
+        "Bot accepts PDF files",
+        "Bot accepts audio files",
+        "Bot accepts images",
+        "Bot accepts video files",
+        "Bot accepts other files when format is supported by NotebookLM/notebooklm-py"
+      ]
+    },
+    {
+      "id": "US-3",
+      "title": "Execute research through NotebookLM",
+      "description": "Bot uses NotebookLM as the main engine for generating research outputs.",
+      "acceptance_criteria": [
+        "Bot uses notebooklm-py as integration layer",
+        "Materials are uploaded to NotebookLM",
+        "Requested output type is triggered within NotebookLM capabilities",
+        "Final result is returned to Telegram"
+      ]
+    },
+    {
+      "id": "US-4",
+      "title": "Free-form intent (no menu)",
+      "description": "User writes requests in natural language without menus or fixed commands.",
+      "acceptance_criteria": [
+        "User can write requests naturally (e.g. 'make an audio review', 'prepare a summary')",
+        "Bot interprets requests within NotebookLM-supported capabilities",
+        "No menu-first UX required"
+      ]
+    },
+    {
+      "id": "US-5",
+      "title": "Progress status updates",
+      "description": "Bot shows processing progress in Telegram.",
+      "acceptance_criteria": [
+        "Status: task accepted",
+        "Status: materials uploaded / preparing",
+        "Status: sent to NotebookLM",
+        "Status: result generating",
+        "Status: result ready"
+      ]
+    },
+    {
+      "id": "US-6",
+      "title": "Return results to Telegram",
+      "description": "Bot delivers research results back to the same Telegram chat.",
+      "acceptance_criteria": [
+        "Result is sent to the same chat",
+        "Bot can send single message",
+        "Bot can send multiple messages if format requires it",
+        "Bot can attach files (audio, images, documents) when needed"
+      ]
+    },
+    {
+      "id": "US-7",
+      "title": "Context memory (24 hours)",
+      "description": "Bot remembers current task context for follow-up requests.",
+      "acceptance_criteria": [
+        "Bot remembers current task context for 24 hours",
+        "User can send follow-ups like 'make it shorter', 'translate it', 'now make audio version'",
+        "After 24 hours, task is no longer active context by default"
+      ]
+    },
+    {
+      "id": "US-8",
+      "title": "Parallel projects",
+      "description": "User can run multiple research tasks simultaneously.",
+      "acceptance_criteria": [
+        "User can have multiple active projects at once",
+        "Each project maps to a separate NotebookLM notebook/project",
+        "Bot tracks status of each project independently"
+      ]
+    },
+    {
+      "id": "US-9",
+      "title": "Persist project metadata in Supabase",
+      "description": "All research projects and metadata are stored in Supabase.",
+      "acceptance_criteria": [
+        "Project stores: project_id, user_id, project_name, original_user_request, status, notebooklm_project_id, result_type, created_at, updated_at",
+        "Result metadata also stored: telegram_message_refs, result_summary, notebooklm_result_ref"
+      ]
+    },
+    {
+      "id": "US-10",
+      "title": "Auto-name projects with rename",
+      "description": "Projects are named automatically but can be renamed later.",
+      "acceptance_criteria": [
+        "Project name is auto-generated from user request",
+        "User can rename the project later",
+        "Updated name is saved in Supabase and used in search"
+      ]
+    },
+    {
+      "id": "US-11",
+      "title": "Search past projects",
+      "description": "User can find old research projects.",
+      "acceptance_criteria": [
+        "Search by project name",
+        "Search by original user request text",
+        "Search by attached links/files",
+        "Search by status",
+        "Search by date"
+      ]
+    },
+    {
+      "id": "US-12",
+      "title": "List all projects",
+      "description": "User can see a list of all research projects.",
+      "acceptance_criteria": [
+        "Bot shows project list with: name, creation date, status, material count, request snippet"
+      ]
+    },
+    {
+      "id": "US-13",
+      "title": "Add material to existing project",
+      "description": "User can add new material to an already existing project.",
+      "acceptance_criteria": [
+        "User can write 'add this file to project X'",
+        "Bot resolves target project",
+        "Material is attached to the project",
+        "Project updated in both Supabase and NotebookLM"
+      ]
+    },
+    {
+      "id": "US-14",
+      "title": "View project contents",
+      "description": "User can see which materials belong to a project.",
+      "acceptance_criteria": [
+        "Bot shows material list for the project",
+        "Each material shows: type/name, date added, processing status",
+        "Material statuses: received, uploading, added_to_notebooklm, error, used_in_result"
+      ]
+    },
+    {
+      "id": "US-15",
+      "title": "Handle unsupported formats gracefully",
+      "description": "Bot does not fail entirely because of one unsupported file.",
+      "acceptance_criteria": [
+        "Bot attempts automatic conversion for unsupported formats",
+        "If conversion fails, bot notifies user about specific file",
+        "Remaining materials continue processing",
+        "Failed file gets error status"
+      ]
+    },
+    {
+      "id": "US-16",
+      "title": "Retry on generation errors",
+      "description": "Bot is resilient to temporary integration failures.",
+      "acceptance_criteria": [
+        "Bot automatically retries on temporary NotebookLM failures",
+        "If retries fail, bot shows final error reason",
+        "Error is tracked at project level"
+      ]
+    },
+    {
+      "id": "US-17",
+      "title": "Cancel and delete projects",
+      "description": "User can manage project lifecycle.",
+      "acceptance_criteria": [
+        "User can cancel active task",
+        "User can delete old project",
+        "Deletion removes from both Supabase and NotebookLM",
+        "Both actions require confirmation via inline buttons (Confirm / Cancel)"
+      ]
+    },
+    {
+      "id": "US-18",
+      "title": "File size limit handling",
+      "description": "Clear error messages when files exceed size limits.",
+      "acceptance_criteria": [
+        "Bot relies on Telegram and NotebookLM native limits",
+        "When limit exceeded, bot explains error clearly"
+      ]
+    }
+  ],
+  "data_model": {
+    "research_projects": {
+      "project_id": "uuid PK",
+      "user_id": "text",
+      "project_name": "text",
+      "original_user_request": "text",
+      "status": "text",
+      "notebooklm_project_id": "text",
+      "result_type": "text",
+      "result_ref": "text",
+      "result_summary": "text",
+      "created_at": "timestamptz",
+      "updated_at": "timestamptz"
+    },
+    "research_materials": {
+      "material_id": "uuid PK",
+      "project_id": "uuid FK -> research_projects",
+      "material_type": "text (link, youtube, pdf, audio, image, video, file)",
+      "source_value": "text (URL, file path, or Telegram file_id)",
+      "display_name": "text",
+      "added_at": "timestamptz",
+      "status": "text (received, uploading, added_to_notebooklm, error, used_in_result)"
+    }
+  },
+  "core_behavior": {
+    "input_mode": "free_form_user_request",
+    "project_grouping_window_minutes": 2,
+    "context_memory_hours": 24,
+    "parallel_projects": true,
+    "menu_required": false,
+    "confirmation_buttons_for": ["delete_project", "cancel_task"],
+    "result_storage": ["telegram", "supabase_metadata", "notebooklm_result_ref"],
+    "artifact_history_in_project": false
+  },
+  "status_flow": [
+    "task_accepted",
+    "materials_preparing",
+    "sent_to_notebooklm",
+    "result_generating",
+    "result_ready"
+  ],
+  "material_statuses": [
+    "received",
+    "uploading",
+    "added_to_notebooklm",
+    "error",
+    "used_in_result"
+  ],
+  "supported_inputs": [
+    "plain links",
+    "YouTube URLs",
+    "PDF files",
+    "audio files",
+    "images",
+    "video files",
+    "other files (if supported by NotebookLM/notebooklm-py)"
+  ],
+  "error_handling": {
+    "unsupported_format": "try auto-convert, then notify user and continue with remaining materials",
+    "generation_failure": "automatic retry with exponential backoff, then report final error",
+    "file_size_exceeded": "rely on Telegram/NotebookLM limits, explain error clearly"
+  },
+  "search_fields": [
+    "project_name",
+    "original_user_request",
+    "attached_links_or_files",
+    "status",
+    "date"
+  ],
+  "project_list_view": {
+    "fields": ["project_name", "created_at", "status", "material_count", "request_snippet"]
+  },
+  "phases": [
+    {
+      "id": 1,
+      "name": "Core Ingestion",
+      "tasks": [
+        "Set up Telegram bot with polling",
+        "Accept text messages, files, links",
+        "Implement 2-minute message grouping",
+        "Auto-generate project names",
+        "Send task-accepted status",
+        "Store project in Supabase"
+      ],
+      "verification": "User sends message + file -> project created in Supabase -> user sees task accepted status"
+    },
+    {
+      "id": 2,
+      "name": "NotebookLM Integration",
+      "tasks": [
+        "Integrate notebooklm-py library",
+        "Create NotebookLM notebook per project",
+        "Upload supported materials",
+        "Trigger result generation based on user request",
+        "Return results to Telegram (text, files, multiple messages)",
+        "Implement retry logic with exponential backoff",
+        "Show all 5 status stages during processing"
+      ],
+      "verification": "User sends 'make audio review' + PDF -> bot processes via NotebookLM -> result returned in Telegram"
+    },
+    {
+      "id": 3,
+      "name": "Persistence and Search",
+      "tasks": [
+        "Finalize Supabase schema (projects + materials)",
+        "Persist all project metadata and material statuses",
+        "Implement search across 5 fields",
+        "Implement project listing view",
+        "Implement project contents view",
+        "Implement project rename"
+      ],
+      "verification": "User searches for past project -> finds it. User lists projects -> sees all with metadata."
+    },
+    {
+      "id": 4,
+      "name": "Project Lifecycle",
+      "tasks": [
+        "Add material to existing project by name",
+        "Cancel active task with button confirmation",
+        "Delete project from Supabase + NotebookLM with button confirmation",
+        "24-hour context memory for follow-up requests",
+        "Handle unsupported formats (auto-convert then skip)",
+        "Handle file size limit errors with clear messages"
+      ],
+      "verification": "User adds file to existing project. User deletes project -> removed from both systems. Follow-up within 24h works."
+    }
+  ],
+  "out_of_scope": [
+    "Multi-user mode",
+    "Shared/team projects",
+    "Web UI",
+    "Advanced analytics over research history",
+    "Complex multi-agent orchestration beyond NotebookLM",
+    "Native voice control",
+    "Full artifact history within a project"
+  ],
+  "open_questions": [
+    "What is the actual feature coverage of notebooklm-py?",
+    "Are there NotebookLM rate limits for automation?",
+    "How does the agent plug into OpenClaw routing?",
+    "How does notebooklm-py authenticate with Google/NotebookLM?",
+    "How to map free-form requests to NotebookLM generation actions?",
+    "Same Supabase instance as MaxAiDeveloper or new project?",
+    "VPS migration details (webhook, process management)"
+  ]
+}
