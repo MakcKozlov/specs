@@ -15,6 +15,7 @@ Catalog of feature specs gathered by **Lisa** (SpecAgent) through structured PDR
 | MaxAiDeveloper | [`maxaideveloper/`](maxaideveloper/) | Telegram knowledge bot |
 | meeting-recorder | [`meeting-recorder/`](meeting-recorder/) | iPad meeting recorder app |
 | PostRepost | [`postrepost/`](postrepost/) | Telegram media reposter |
+| Researcher | [`researcher/`](researcher/) | Personal Telegram research agent (NotebookLM + Supabase) |
 | SpecAgent | [`specagent/`](specagent/) | Lisa interview bot itself |
 
 ## Spec Format
