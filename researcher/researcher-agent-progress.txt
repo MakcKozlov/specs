@@ -1,2 +1,2 @@
-status: pr-created
+status: in-progress
 updated_by: maxaicto
