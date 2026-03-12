@@ -13,6 +13,7 @@
 | Проект | Папка | Описание |
 |--------|-------|----------|
 | MaxAiDeveloper | [`maxaideveloper/`](maxaideveloper/) | Telegram-бот для управления знаниями, задачами и встречами |
+| MaxAICTO | [`maxaicto/`](maxaicto/) | AI-технический директор: следит за спеками и задачами, запускает разработку через coding agents |
 | meeting-recorder | [`meeting-recorder/`](meeting-recorder/) | iPad-приложение для записи встреч с транскрипцией |
 | PostRepost | [`postrepost/`](postrepost/) | Telegram-бот для репоста медиа из соцсетей |
 | Researcher | [`researcher/`](researcher/) | Персональный Telegram-агент для исследований (NotebookLM + Supabase) |
