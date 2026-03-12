@@ -1,0 +1,82 @@
+Spec-to-Code Autopilot — MVP Progress
+====================================
+
+[ ] Phase 1 — Intake and Task Registry
+    [ ] Watch `specs` repo via GitHub webhook
+    [ ] Add 10-minute fallback polling/check
+    [ ] Support Telegram manual trigger via free text
+    [ ] Support Telegram manual trigger via explicit command `/run-spec <path>`
+    [ ] Create Supabase schema for `spec_task`
+    [ ] Create Supabase schema for `repo_mapping`
+    [ ] Create Supabase schema for `execution_run`
+    [ ] Create Supabase schema for `approval_state`
+    [ ] Create Supabase schema for `delivery_report`
+    [ ] Implement duplicate-run prevention via Supabase + spec status check
+    [ ] Implement first-run audit of old specs and candidate list
+
+[ ] Phase 2 — Planning and Approval
+    [ ] Resolve spec project -> code repo from config
+    [ ] Support repo mapping override
+    [ ] Support one primary repo + optional related repos
+    [ ] Generate preliminary status report
+        [ ] target project
+        [ ] target repo
+        [ ] complexity
+        [ ] branch need
+        [ ] selected coding agent
+        [ ] implementation plan
+        [ ] blockers / ambiguities
+    [ ] Implement complexity classification
+        [ ] simple
+        [ ] complex
+        [ ] very_complex
+    [ ] Auto-start simple tasks
+    [ ] Require approval for complex / very_complex / unclear tasks
+    [ ] Handle incomplete or conflicting specs via technical review
+
+[ ] Phase 3 — Execution Engine
+    [ ] Use Claude Code as primary coding agent
+    [ ] Clone target repo(s) from GitHub per run
+    [ ] Create fresh temp workspace for each run
+    [ ] Run implementation workflow
+    [ ] Retry failed runs automatically
+    [ ] Run tests when available
+    [ ] Run lint / typecheck when available
+    [ ] Attempt local app run when practical
+    [ ] Produce brief self-review before PR
+
+[ ] Phase 4 — Delivery and Traceability
+    [ ] Commit code changes
+    [ ] Push branch
+    [ ] Create PR
+    [ ] Update spec/progress at key stages
+        [ ] taken
+        [ ] in-progress
+        [ ] pr-created
+        [ ] done
+    [ ] Send Telegram report with
+        [ ] spec name
+        [ ] project / repo
+        [ ] summary of work
+        [ ] branch link
+        [ ] PR link
+        [ ] tests/check results
+        [ ] manual review items
+    [ ] On final failure, send failure report with reason
+    [ ] On final failure, propose next step
+    [ ] On final failure, create linked issue in target code repo
+
+[ ] MVP Done Checklist
+    [ ] New specs are detected automatically
+    [ ] Old specs can be audited and proposed as candidates
+    [ ] Telegram can trigger execution manually
+    [ ] Preliminary status is sent before coding
+    [ ] Simple tasks start automatically
+    [ ] Complex or unclear tasks wait for approval
+    [ ] Work runs in fresh cloned temp workspaces
+    [ ] Claude Code executes implementation
+    [ ] Validation checks run when applicable
+    [ ] Commit / push / PR flow works end-to-end
+    [ ] Spec progress is updated at key milestones
+    [ ] Telegram delivery report is sent
+    [ ] Failed runs retry and create linked issue if unresolved

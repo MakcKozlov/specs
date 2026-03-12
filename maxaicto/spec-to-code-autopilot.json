@@ -1,0 +1,313 @@
+{
+  "project": {
+    "name": "MaxAICTO",
+    "slug": "maxaicto",
+    "feature_name": "Spec-to-Code Autopilot",
+    "feature_slug": "spec-to-code-autopilot",
+    "description": "Autonomous CTO agent that watches GitHub specs, evaluates them, and orchestrates implementation through coding agents."
+  },
+  "goal": "Convert GitHub specs into an execution pipeline that can assess, approve, implement, validate, and report software delivery work.",
+  "triggers": {
+    "autonomous": [
+      "new spec in specs repo",
+      "GitHub webhook",
+      "10-minute fallback check"
+    ],
+    "manual": [
+      "Telegram free-text command",
+      "Telegram explicit command like /run-spec <path>"
+    ]
+  },
+  "core_flow": [
+    "detect or receive spec",
+    "resolve project and repo mapping",
+    "check deduplication / current task state",
+    "prepare preliminary status",
+    "classify complexity",
+    "auto-start if simple",
+    "wait for approval if complex or unclear",
+    "clone repo(s) into fresh temp workspace",
+    "run Claude Code",
+    "validate output",
+    "commit and push branch",
+    "create PR",
+    "update spec/progress",
+    "send Telegram report"
+  ],
+  "preliminary_status": {
+    "fields": [
+      "target project",
+      "target repo",
+      "complexity assessment",
+      "new branch needed or not",
+      "selected coding agent",
+      "implementation plan",
+      "blockers / ambiguities"
+    ]
+  },
+  "complexity": {
+    "simple": {
+      "auto_start": true,
+      "signals": [
+        "one primary repo",
+        "small localized change",
+        "no migrations",
+        "low regression risk"
+      ]
+    },
+    "complex": {
+      "auto_start": false,
+      "signals": [
+        "multiple files or modules",
+        "new integration",
+        "migration",
+        "higher regression risk"
+      ]
+    },
+    "very_complex": {
+      "auto_start": false,
+      "signals": [
+        "multiple repos",
+        "broad refactor",
+        "incomplete or conflicting spec",
+        "high uncertainty"
+      ]
+    }
+  },
+  "coding_agent": {
+    "primary": "Claude Code",
+    "future": ["Codex"],
+    "selection_mode_mvp": "fixed_primary"
+  },
+  "repository_strategy": {
+    "primary_repo_per_spec": true,
+    "related_repos_supported": true,
+    "mapping_source": "config with override support",
+    "execution_source": "GitHub clone/pull workflow",
+    "workspace_mode": "fresh temp workspace per run"
+  },
+  "validation": {
+    "run_when_applicable": [
+      "tests",
+      "lint",
+      "typecheck",
+      "local app run",
+      "brief self-review"
+    ]
+  },
+  "post_execution": {
+    "actions": [
+      "commit",
+      "push",
+      "create PR",
+      "send Telegram report",
+      "update spec/progress"
+    ],
+    "telegram_report_fields": [
+      "spec name",
+      "project / repo",
+      "what was done",
+      "branch link",
+      "PR link",
+      "tests/check results",
+      "manual review items"
+    ],
+    "spec_progress_updates": [
+      "taken",
+      "in-progress",
+      "pr-created",
+      "done"
+    ]
+  },
+  "failure_handling": {
+    "retry": true,
+    "after_retry_failure": [
+      "send failure report with reason",
+      "propose next step",
+      "create linked GitHub issue in code repo"
+    ]
+  },
+  "manual_conflict_policy": {
+    "mode": "warn_then_allow_force",
+    "examples": [
+      "spec already in progress",
+      "approval pending",
+      "PR already exists"
+    ]
+  },
+  "old_specs": {
+    "supported": true,
+    "first_run_behavior": "audit backlog and send candidate list before execution"
+  },
+  "deduplication": {
+    "mode": "hybrid",
+    "sources": [
+      "Supabase internal task state",
+      "spec repo progress/status check"
+    ]
+  },
+  "storage": {
+    "provider": "Supabase",
+    "note": "Use a dedicated MaxAICTO project/schema.",
+    "entities": {
+      "spec_task": [
+        "id",
+        "spec_repo",
+        "spec_path",
+        "spec_project",
+        "feature_slug",
+        "status",
+        "complexity",
+        "primary_repo",
+        "related_repos",
+        "current_run_id",
+        "approval_required",
+        "created_at",
+        "updated_at"
+      ],
+      "repo_mapping": [
+        "id",
+        "project_slug",
+        "primary_repo_url",
+        "related_repo_urls",
+        "config_source",
+        "override_active",
+        "updated_at"
+      ],
+      "execution_run": [
+        "id",
+        "spec_task_id",
+        "agent_type",
+        "run_status",
+        "workspace_path",
+        "branch_name",
+        "commit_sha",
+        "pr_url",
+        "attempt_number",
+        "test_summary",
+        "self_review",
+        "started_at",
+        "finished_at"
+      ],
+      "approval_state": [
+        "id",
+        "spec_task_id",
+        "state",
+        "reason",
+        "requested_at",
+        "resolved_at"
+      ],
+      "delivery_report": [
+        "id",
+        "spec_task_id",
+        "run_id",
+        "telegram_chat_id",
+        "telegram_message_refs",
+        "report_type",
+        "sent_at"
+      ]
+    }
+  },
+  "user_stories": [
+    {
+      "id": "US1",
+      "title": "Detect new specs automatically"
+    },
+    {
+      "id": "US2",
+      "title": "Run specs manually from Telegram"
+    },
+    {
+      "id": "US3",
+      "title": "Prepare preliminary status before coding"
+    },
+    {
+      "id": "US4",
+      "title": "Auto-start only simple tasks"
+    },
+    {
+      "id": "US5",
+      "title": "Execute implementation via Claude Code"
+    },
+    {
+      "id": "US6",
+      "title": "Validate output before delivery"
+    },
+    {
+      "id": "US7",
+      "title": "Deliver implementation result"
+    },
+    {
+      "id": "US8",
+      "title": "Handle failure safely"
+    },
+    {
+      "id": "US9",
+      "title": "Audit old specs"
+    }
+  ],
+  "phases": [
+    {
+      "name": "Phase 1 - Intake and Task Registry",
+      "items": [
+        "watch specs repo via webhook",
+        "10-minute fallback polling",
+        "Telegram command intake",
+        "Supabase schema",
+        "deduplication logic",
+        "old-spec audit flow"
+      ]
+    },
+    {
+      "name": "Phase 2 - Planning and Approval",
+      "items": [
+        "project/repo resolution",
+        "complexity classification",
+        "preliminary status report",
+        "approval flow"
+      ]
+    },
+    {
+      "name": "Phase 3 - Execution Engine",
+      "items": [
+        "GitHub clone/pull workflow",
+        "fresh temp workspace per run",
+        "Claude Code execution wrapper",
+        "retry logic",
+        "validation pipeline"
+      ]
+    },
+    {
+      "name": "Phase 4 - Delivery and Traceability",
+      "items": [
+        "commit/push/PR creation",
+        "spec progress updates",
+        "Telegram delivery report",
+        "failure issue creation and linking"
+      ]
+    }
+  ],
+  "definition_of_done": [
+    "detect new specs automatically",
+    "allow manual Telegram trigger",
+    "map specs to target repos",
+    "produce preliminary status",
+    "auto-start simple tasks",
+    "require approval for complex or unclear tasks",
+    "run Claude Code in fresh cloned workspaces",
+    "run checks when applicable",
+    "commit, push, and create PRs",
+    "update spec progress at key stages",
+    "report outcome in Telegram",
+    "retry failures and create linked issue if unresolved",
+    "audit old specs and propose candidates"
+  ],
+  "out_of_scope": [
+    "developer team management",
+    "multi-user approvals",
+    "auto-merge to main",
+    "full roadmap planning",
+    "budgeting / velocity analytics",
+    "autonomous production deploys"
+  ]
+}
