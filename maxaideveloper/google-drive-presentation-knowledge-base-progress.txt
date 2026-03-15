@@ -1,0 +1,29 @@
+Google Drive Presentation Knowledge Base
+Project: MaxAiDeveloper
+Status: new
+
+Phase 1 — Searchable index
+[ ] Connect Google Drive root folder
+[ ] Build recursive indexer for nested folders
+[ ] Extract searchable text/content from presentations
+[ ] Implement Telegram search flow
+[ ] Return Google Drive links for exact matches
+
+Phase 2 — Ambiguity and recommendation UX
+[ ] Ask clarifying questions when multiple matches exist
+[ ] Show similar presentations when no exact match is found
+[ ] Include path/context in search results
+
+Phase 3 — Comments and intake workflow
+[ ] Support one text comment per presentation
+[ ] Create dedicated Telegram topic for file intake
+[ ] Suggest several existing folders for uploaded files
+[ ] Allow creating a new folder during intake
+[ ] Upload selected file to Google Drive
+[ ] Refresh index after upload
+
+Phase 4 — Hardening and operations
+[ ] Re-index the presentation base once per day
+[ ] Enforce access by Telegram group membership (3784470567)
+[ ] Add logging and error handling
+[ ] Handle permission/indexing edge cases

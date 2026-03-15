@@ -1,0 +1,328 @@
+{
+  "feature": {
+    "name": "Google Drive Presentation Knowledge Base",
+    "slug": "google-drive-presentation-knowledge-base",
+    "project": "MaxAiDeveloper",
+    "projectSlug": "maxaideveloper",
+    "summary": "Telegram bot feature for searching, indexing, commenting on, and uploading team presentations stored in a single Google Drive root folder with nested subfolders."
+  },
+  "problem": "The team stores presentations in Google Drive but needs a faster Telegram-based way to find relevant decks, retrieve links, and keep the library organized.",
+  "goals": [
+    "Search presentations from Telegram using natural-language requests",
+    "Index a single Google Drive root folder recursively",
+    "Search by file name and presentation content",
+    "Return links to matching files",
+    "Ask clarifying questions when several files match",
+    "Show similar files when no exact match exists",
+    "Store one internal text comment per presentation",
+    "Support file intake through a dedicated Telegram topic",
+    "Suggest folders or create new folders during upload",
+    "Restrict access to members of the authorized Telegram group"
+  ],
+  "nonGoals": [
+    "Multiple comments or comment history per file",
+    "Fine-grained role-based permissions within the allowed team",
+    "Support for multiple Google Drive roots in MVP",
+    "Public or external access outside the Telegram group",
+    "Complex in-chat document editing"
+  ],
+  "users": {
+    "primary": [
+      {
+        "role": "Team member",
+        "constraint": "Must be a member of Telegram group 3784470567"
+      }
+    ],
+    "unauthorized": [
+      "Users who are not members of Telegram group 3784470567"
+    ]
+  },
+  "source": {
+    "googleDrive": {
+      "rootFolder": "single configured root folder",
+      "structure": "nested subfolders",
+      "contentTypes": [
+        "presentations"
+      ]
+    },
+    "telegram": {
+      "authorizedGroupId": "3784470567",
+      "uploadFlow": "dedicated topic for file intake"
+    }
+  },
+  "userStories": [
+    {
+      "id": "US1",
+      "title": "Search for a presentation",
+      "asA": "team member",
+      "iWant": "to ask the bot for a presentation in natural language",
+      "soThat": "I can quickly get the right Google Drive link",
+      "acceptanceCriteria": [
+        "User can ask in Telegram for a presentation using a natural-language request",
+        "Bot searches indexed presentations by filename and content",
+        "If one strong match is found, bot returns the presentation link",
+        "Response includes context such as title, path, or snippet",
+        "Only authorized users can use this flow"
+      ]
+    },
+    {
+      "id": "US2",
+      "title": "Clarify ambiguous search results",
+      "asA": "team member",
+      "iWant": "the bot to ask a clarifying question when several files may match",
+      "soThat": "I can choose the correct presentation",
+      "acceptanceCriteria": [
+        "If multiple strong matches are found, bot asks a clarifying question",
+        "Bot presents several candidate files",
+        "User can clarify or choose one option",
+        "Bot then returns the correct link"
+      ]
+    },
+    {
+      "id": "US3",
+      "title": "Show similar presentations when exact match is not found",
+      "asA": "team member",
+      "iWant": "to see similar presentations if the exact one is not found",
+      "soThat": "I can still discover useful materials",
+      "acceptanceCriteria": [
+        "If no exact match is found, bot responds with similar presentations",
+        "Suggestions are based on filename, content, or semantic relevance",
+        "Suggested results include links",
+        "Bot clearly labels them as similar results"
+      ]
+    },
+    {
+      "id": "US4",
+      "title": "Keep the library indexed",
+      "asA": "system owner",
+      "iWant": "the Google Drive tree to be re-indexed automatically once per day",
+      "soThat": "new and changed presentations become searchable",
+      "acceptanceCriteria": [
+        "Bot indexes one Google Drive root folder and all nested subfolders",
+        "Scheduled sync runs once per day",
+        "Sync detects newly added files and updates the index",
+        "Index stores enough metadata for search and link retrieval",
+        "Failures are logged and visible to maintainers"
+      ]
+    },
+    {
+      "id": "US5",
+      "title": "Attach one internal comment to a presentation",
+      "asA": "team member",
+      "iWant": "to add one text comment to a presentation",
+      "soThat": "the team can store lightweight internal context about the file",
+      "acceptanceCriteria": [
+        "Each indexed presentation can have one text comment",
+        "Team members can create or update the comment",
+        "Comment is visible in search context or file details",
+        "Latest comment replaces the previous one",
+        "Only authorized users can edit comments"
+      ]
+    },
+    {
+      "id": "US6",
+      "title": "Upload a new presentation from Telegram",
+      "asA": "team member",
+      "iWant": "to send a file into a dedicated Telegram topic",
+      "soThat": "the bot can help me add it into the presentation library",
+      "acceptanceCriteria": [
+        "There is a dedicated Telegram topic for presentation intake",
+        "Authorized user can upload a presentation file into that topic",
+        "Bot suggests relevant destination folders",
+        "Bot presents several matching folders and an option to create a new folder",
+        "After confirmation, bot uploads the file to Google Drive into the selected folder",
+        "Uploaded file becomes searchable after indexing or immediate refresh"
+      ]
+    },
+    {
+      "id": "US7",
+      "title": "Create new folders during intake",
+      "asA": "team member",
+      "iWant": "to create a new destination folder during upload",
+      "soThat": "new categories can be added without leaving Telegram",
+      "acceptanceCriteria": [
+        "During intake, bot offers create-new-folder",
+        "User can specify the new folder name",
+        "Bot creates the folder under the configured Google Drive root or selected parent",
+        "Bot uploads the file into the new folder",
+        "New folder is included in future indexing"
+      ]
+    },
+    {
+      "id": "US8",
+      "title": "Enforce access by Telegram group membership",
+      "asA": "system owner",
+      "iWant": "the feature to work only for members of the authorized Telegram group",
+      "soThat": "the presentation base is not exposed outside the team",
+      "acceptanceCriteria": [
+        "Authorized group id is configurable and set to 3784470567",
+        "Before responding in private chat, bot checks whether the user is a member of the authorized group",
+        "If user is not a member, bot does not provide search results or upload/comment access",
+        "Unauthorized access attempts do not leak file names or links"
+      ]
+    }
+  ],
+  "functionalRequirements": {
+    "search": [
+      "Support natural-language queries in Telegram",
+      "Search over file name, extracted content, folder path metadata, and optional internal comment",
+      "Return Google Drive shareable link for matched presentation",
+      "Ask for clarification when several strong matches exist",
+      "Show similar files when no exact match exists"
+    ],
+    "indexing": [
+      "Index one configured Google Drive root folder recursively",
+      "Run scheduled sync once per day",
+      "Store metadata including file id, file name, link, path, mime type, extracted text, last indexed timestamp, and internal comment"
+    ],
+    "comments": [
+      "Support one plain-text comment per presentation",
+      "Allow create/update by authorized users"
+    ],
+    "intake": [
+      "Provide dedicated Telegram topic for uploads",
+      "Suggest several target folders",
+      "Offer create-new-folder option",
+      "Upload selected file to Google Drive",
+      "Confirm resulting path and link"
+    ],
+    "authorization": [
+      "Restrict access to members of Telegram group 3784470567",
+      "Block private chat responses for non-members",
+      "Apply same authorization policy to search, comment, and upload flows"
+    ]
+  },
+  "conversationFlows": {
+    "search": [
+      "User asks for a presentation in Telegram",
+      "Bot checks authorization",
+      "Bot searches indexed files",
+      "Single result returns link",
+      "Multiple results trigger clarification",
+      "No exact result returns similar files"
+    ],
+    "upload": [
+      "User uploads a file in the dedicated topic",
+      "Bot checks authorization",
+      "Bot analyzes file name/content",
+      "Bot suggests folders or create-new-folder option",
+      "User confirms destination",
+      "Bot uploads file to Google Drive",
+      "Bot confirms success",
+      "File becomes searchable"
+    ],
+    "comment": [
+      "Authorized user opens comment flow",
+      "Bot shows current comment if present",
+      "User adds or replaces comment",
+      "Bot saves latest comment"
+    ]
+  },
+  "technicalDesign": {
+    "integrations": [
+      "Google Drive API",
+      "Telegram Bot API / topic workflows",
+      "Membership validation against Telegram group",
+      "Storage/index layer for metadata and extracted content"
+    ],
+    "searchApproach": [
+      "Metadata search",
+      "Full-text search over extracted content",
+      "Optional semantic relevance / embeddings for similar results"
+    ],
+    "operationalNotes": [
+      "Consider immediate partial refresh after successful upload",
+      "Log sync failures and permission errors",
+      "Handle moved files and indexing drift"
+    ]
+  },
+  "edgeCases": [
+    "Broad user query matches many files",
+    "Text extraction fails for some presentations",
+    "Unsupported uploaded file format",
+    "Unauthorized private-chat request",
+    "Low-confidence folder suggestions",
+    "Folder creation naming conflict",
+    "Drive permissions block read or upload",
+    "Daily sync failure or timeout",
+    "File moved after last indexing"
+  ],
+  "dependencies": [
+    "Google Drive API credentials and root folder access",
+    "Telegram group membership checks and topic support",
+    "Search/index storage",
+    "Content extraction pipeline for presentation formats",
+    "Daily scheduler/cron"
+  ],
+  "mvp": {
+    "scope": [
+      "Authorized team-only access",
+      "Search by filename and content",
+      "Clarification for ambiguous matches",
+      "Similar suggestions when no exact match exists",
+      "Daily indexing",
+      "One comment per presentation",
+      "Dedicated upload topic",
+      "Folder suggestions and create-new-folder flow",
+      "Upload to Google Drive and make files searchable"
+    ],
+    "outOfScope": [
+      "Multiple comments per file",
+      "Role-based admin moderation",
+      "Advanced taxonomy management",
+      "Multiple Google Drive roots",
+      "Rich approval workflow"
+    ]
+  },
+  "phases": [
+    {
+      "name": "Phase 1 — Searchable index",
+      "items": [
+        "Connect Google Drive root folder",
+        "Build recursive indexer",
+        "Extract searchable text",
+        "Implement Telegram search flow",
+        "Return links for exact matches"
+      ]
+    },
+    {
+      "name": "Phase 2 — Ambiguity and recommendation UX",
+      "items": [
+        "Add clarification flow for multiple matches",
+        "Add similar-results fallback",
+        "Show path and short context in results"
+      ]
+    },
+    {
+      "name": "Phase 3 — Comments and intake workflow",
+      "items": [
+        "Add one-comment-per-file support",
+        "Create dedicated upload topic workflow",
+        "Suggest folders for uploaded files",
+        "Support create-new-folder flow",
+        "Upload files to Google Drive and refresh index"
+      ]
+    },
+    {
+      "name": "Phase 4 — Hardening and operations",
+      "items": [
+        "Run daily scheduled reindex",
+        "Enforce auth by group membership",
+        "Add logging, monitoring, and failure handling",
+        "Tune performance for larger libraries"
+      ]
+    }
+  ],
+  "definitionOfDone": [
+    "Authorized team members can request presentations and receive relevant Google Drive links",
+    "Search works across file names and presentation content",
+    "Bot asks clarifying questions for ambiguous matches",
+    "Bot suggests similar files when exact match is unavailable",
+    "Daily indexing keeps the base fresh",
+    "Each presentation supports one editable internal comment",
+    "Team members can upload files via a dedicated Telegram topic into existing or new folders",
+    "Non-members of the authorized Telegram group cannot access the feature",
+    "Google Drive root folder and subfolders are indexed recursively"
+  ],
+  "status": "new"
+}
